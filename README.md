@@ -74,4 +74,4 @@ This wraps the `LFSRImplementation.cs` classes into the helpers from the other p
 
 This is how the standalone program looks like in VS. Keep in mind that this is all that has been written specific to LFSR in this repository -- all else (like LFSRImplementation) is required to be written in any case. All that would be required is to adhere to the standalone component interface in something like `YourComponentImplementation.cs` which is mirroring the traditional API (just with zero dependencies).
 
-![/dpc/Program_cs_snip.png]
+![/doc/Program_cs_snip.png]
