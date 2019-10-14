@@ -27,8 +27,6 @@ Completing the references that are at this time necessary is the Project `CrypTo
 
 # Project structure explained
 
-These are the interesting files in this project; prominently, no `.cs` source files have been left out and all projects are listed here.
-
 ```
 .
 ├── ComponentStandalone                    (1)
@@ -38,6 +36,7 @@ These are the interesting files in this project; prominently, no `.cs` source fi
 │   ├── Program.cs                         (4.1)
 ```
 
+(1) through (3) are support projects. For each component, only one project like LFSRStandalone has to be added.
 
 
 **`├── ComponentStandalone                    (1)`**
