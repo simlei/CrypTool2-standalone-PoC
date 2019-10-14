@@ -1,31 +1,12 @@
 ﻿using Cryptool.LFSR;
 using Cryptool.PluginBase.Utils;
 using Cryptool.PluginBase.Utils.Logging;
-using Cryptool.PluginBase.Utils.ObjectDeconstruct;
 using Cryptool.PluginBase.Utils.StandaloneComponent;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Cryptool.PluginBase.Utils.Datatypes;
 using static Cryptool.PluginBase.Utils.Datatypes.Datatypes;
 using Cryptool.PluginBase.Utils.StandaloneComponent.Program;
-
-// This is for debugging: Add an expression watch with "D.To.Str(<your-variable>)" and see it pretty-printed.
-namespace D
-{
-    // "current" object for debugging
-    public static class Current
-    {
-        public static LFSRRecord R;
-        public static dynamic f1; // some field
-    }
-    public static class To
-    {
-        public static String Str(object o) => Cryptool.LFSR.ConvertTo.String(o);
-    }
-}
 
 namespace Cryptool.LFSR
 {
@@ -44,7 +25,6 @@ namespace Cryptool.LFSR
             String name = "Generic"
             ) : base(programSpec, interaction)
         {
-
             Name = name;
         }
 
@@ -55,7 +35,6 @@ namespace Cryptool.LFSR
         public HistoryBox<string> OutStatesString = new HistoryBox<String>();
         public HistoryBox<string> OutString = new HistoryBox<String>();
         public HistoryBox<List<bool>> LFSRRegHistory = new HistoryBox<List<bool>>();
-
 
         public override void ComponentCreated()
         {
@@ -68,19 +47,12 @@ namespace Cryptool.LFSR
                 LFSRRegHistory.Record(API.currentRound.RegInitial.Bits);
             };
         }
-
-        internal void LogResults()
-        {
-
-        }
     }
 
     public static class LFSRTests
     {
-        public static void Assert(bool value, String logMsg = null)
-        {
-            if (!value) throw new Exception(logMsg ?? "Assert failed");
-        }
+
+        #region LFSR test fixtures : two configurations, two interactions
 
         public static LFSRStandaloneComponent LFSRConfig10RoundsNoCLK()
         {
@@ -90,7 +62,6 @@ namespace Cryptool.LFSR
             param.Rounds.Value = 10;
             return new LFSRStandaloneComponent(param);
         }
-
         public static LFSRStandaloneComponent LFSRConfiguration5RoundsCLK()
         {
             var param = new LFSRParameters();
@@ -100,12 +71,11 @@ namespace Cryptool.LFSR
             return new LFSRStandaloneComponent(param);
         }
 
-        // Interaction 1: 4-bit Fibonacci LFSR from Anne Canteaut [6], section 3.1, page 44:
-
-        // c = tap = 0011
-        // seed = 1011
-        // Expected output starts with:         1011 1100 0100 1101 = 0xBC4D
-        // Expected output(after first stage):  1100 0100 1101
+        /// Interaction 1: 4-bit Fibonacci LFSR from Anne Canteaut [6], section 3.1, page 44:
+        /// c = tap = 0011
+        /// seed = 1011
+        /// Expected output starts with:         1011 1100 0100 1101 = 0xBC4D
+        /// Expected output(after first stage):  1100 0100 1101
         public static IComponentProgramInteraction<LFSRAPI, LFSRParameters> InteractionAnneCanteaut44()
         {
             return SyncInter.CompleteExecAfterEach<LFSRAPI, LFSRParameters>(Sequence<Action<LFSRAPI>>(
@@ -114,17 +84,22 @@ namespace Cryptool.LFSR
             ));
         }
 
-        // Interaction 2: 16 - bit Fibonacci LFSR from Wikipedia[1], see Figure 1 above:
-
-        // c = tap = 0000 0000 0010 1101
-        // seed = 1010 1100 1110 0001 = 0xACE1
-        // Expected output(after first stage):
-        // 0101 0110 0111 0000 = 0x5670
+        /// Interaction 2: 16 - bit Fibonacci LFSR from Wikipedia[1], see Figure 1 above:
+        /// c = tap = 0000 0000 0010 1101
+        /// seed = 1010 1100 1110 0001 = 0xACE1
+        /// Expected output(after first stage):
+        /// 0101 0110 0111 0000 = 0x5670
         public static IComponentProgramInteraction<LFSRAPI, LFSRParameters> InteractionWikipedia()
         {
             return SyncInter.CompleteExecAfterEach<LFSRAPI, LFSRParameters>(Sequence<Action<LFSRAPI>>(
+
+                // give some values
+
                 api => api.InputPoly.Value = "1011 1100 0100 1101",
                 api => api.InputSeed.Value = "1010 1100 1110 0001 ",
+
+                // Tick tock
+
                 api => api.InputClock.Value = false,
                 api => api.InputClock.Value = true,
 
@@ -142,7 +117,9 @@ namespace Cryptool.LFSR
             ));
         }
 
-        // -------- Combine (parameter) configuration and (input sequence) interactions into test cases
+        #endregion
+
+        #region LFSR test cases: combination of configuration, interaction and a label
 
         public static LFSRRecord case1Record = new LFSRRecord(
             LFSRConfig10RoundsNoCLK,
@@ -156,12 +133,10 @@ namespace Cryptool.LFSR
             "Wikipedia5RoundsWithCLK"
             );
 
-        public static void LogThis(this object msg, Logger logger=null, LogLevel lvl=null)
-        {
-            var level = lvl ?? LogLevels.Debug;
-            var log = logger ?? GlobalLog.VSDebug;
-            LFSR.ConvertTo.Log(msg, level, log);
-        }
+        #endregion
+
+        // The Program / Test invocation
+
         public static void Main(string[] args)
         {
             Logger logger = new Logger("LFSR Tests");
@@ -169,11 +144,9 @@ namespace Cryptool.LFSR
             GlobalLog.CErr.Receiving(logger);
 
             case1Record.Run();
-
-//             case2Record.OnComponentCreated += c => c.api.OnRoundStarting += () => LogThis("case 2 round triggered");
             case2Record.Run();
 
-            logger.prefix = "LFSR Tests, Case 1";
+            logger.prefix = "LFSR Tests, Case 1 (verbose)";
 
             "-------------  Single bit history:".LogThis(logger);
             case1Record.OutBit.History.LogThis(logger);
@@ -190,11 +163,53 @@ namespace Cryptool.LFSR
             // Assert the correctness of the output...
             Assert(case1Record.OutString.Last.Equals("1011110001"));
             
-            logger.prefix = "LFSR Tests, Case 2";
+            logger.prefix = "LFSR Tests, Case 2 ()";
             case2Record.OutBit.History.LogThis(logger);
             case2Record.ProgressHistory.History.LogThis(logger);
         }
 
+        #region Support methods for testing and logging
+
+        /// <summary>
+        /// Good old assert
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="logMsg"></param>
+        public static void Assert(bool value, String logMsg = null)
+        {
+            if (!value) throw new Exception(logMsg ?? "Assert failed");
+        }
+
+        /// <summary>
+        /// implicit method that allows logging any string with the LFSR ToString conversion / object deconstruction scheme
+        /// </summary>
+        /// <param name="msg"></param>
+        /// <param name="logger"></param>
+        /// <param name="lvl"></param>
+        public static void LogThis(this object msg, Logger logger=null, LogLevel lvl=null)
+        {
+            var level = lvl ?? LogLevels.Debug;
+            var log = logger ?? GlobalLog.VSDebug;
+            LFSR.ConvertTo.Log(msg, level, log);
+        }
+
+        #endregion
     }
 }
 
+// Some debugging helpers in a small-footprint namespace "D" 
+// - Add an expression watch with "D.To.Str(<your-variable>)" and see it pretty-printed
+// - Access the current "UUT" LFSRRecord with D.Current.R -- complete history of everything
+namespace D
+{
+    // "current" object for debugging
+    public static class Current
+    {
+        public static LFSRRecord R;
+        public static dynamic f1; // some field
+    }
+    public static class To
+    {
+        public static String Str(object o) => Cryptool.LFSR.ConvertTo.String(o);
+    }
+}
