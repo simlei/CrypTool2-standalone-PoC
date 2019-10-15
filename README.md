@@ -44,7 +44,7 @@ Completing the references that are at this time necessary is the Project `CrypTo
 As explained before, these hosts the absolutely necessary file that defines a component's interface. This project has no source files itself but the one referenced from CrypTool2 with the path `CrypTool2\trunk\CrypPluginBase\Utils\StandaloneComponent\StandaloneComponents.cs`.
 
 
-**`├── CrypTool2Common                        (3)`**
+**`├── CrypTool2Common                        (2)`**
 
 This also purely references some other CT2 files, which are not really vital (with some refactoring) for this kind of "Stand-alone components" concept to work. Some common code base with CT2 is convenient, though, and at this time, this common code base consists of:
 
@@ -54,7 +54,7 @@ This also purely references some other CT2 files, which are not really vital (wi
     <Compile Include="..\..\CrypTool2\trunk\CrypPluginBase\Utils\Datatypes.cs" />
 ```
 
-**`├── ComponentStandaloneUtil                (2)`**
+**`├── ComponentStandaloneUtil                (3)`**
 
 This project contains helpers to make a component a stand-alone CLI program. For example, it provides classes that allow putting data into the inputs of a component in a fashion that is convenient for testing. The demonstration CLI program is actually testing the LFSR component with two example test cases; it is not far from there to parsing arguments and using them as input, though.
 
